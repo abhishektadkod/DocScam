@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View, Button,CameraRoll } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
@@ -6,28 +6,46 @@ import * as Print from 'expo-print';
 import * as Permissions from 'expo-permissions';
 
 
-
 export default function App() {
   let [selectedImage, setSelectedImage] = React.useState(null);
 
+  let [image, multipleImage] = React.useState([]);
+  
   let openImagePickerAsync = async () => {
     const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA);
         if (status !== 'granted') {
           alert('Permission to access camera roll is required!');
-          return;
+          return(<Text> Hello </Text>);
         }
         console.log(status,permissions)
       let result = await ImagePicker.launchCameraAsync({
         base64:true,
-        allowsEditing:true,
-        aspect: [4, 3],
+        //allowsEditing:true,
+        aspect: [3, 4],
       });
       if (!result.cancelled) {
         setSelectedImage({ localUri: result.uri });
+        multipleImage([
+      ...image,
+      {
+        id: image.length,
+        name: result.uri
       }
-    console.log(result)
-    
-  };
+    ]);
+      }
+    console.log(image);
+  }
+
+  let openPdf = async() => {
+    let x ="";
+    image.map(item => { 
+        x=x+"<img width='595px' height='842px' src='"+item.name+"'/>"
+    });
+     let file = await Print.printAsync({
+       html: x
+     }); 
+    console.log(x);
+    }
 
   let openShareDialogAsync = async () => {
     if (!(await Sharing.isAvailableAsync())) {
@@ -38,29 +56,28 @@ export default function App() {
     Sharing.shareAsync(selectedImage.localUri);
   };
 
-  if (selectedImage !== null) {
+  if (image.length!=0) {
     return (
       <View style={styles.container}>
-        <Image source={{ uri: selectedImage.localUri }} style={styles.thumbnail} />
-        <TouchableOpacity onPress={async()=>await Print.printAsync({html:"<img width='595px' height='842px' src='"+selectedImage.localUri+"'/>",})} style={styles.button}>
-          <Text style={styles.buttonText}>Add this photo</Text>
+        
+         <TouchableOpacity onPress={async()=>await  openImagePickerAsync()} style={styles.button}>
+          <Text style={styles.buttonText}>Take another photo</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={async()=>await openPdf()} style={styles.button}>
+          <Text style={styles.buttonText}>PDF Preview</Text>
+        </TouchableOpacity>
+
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Image source={{ uri: 'https://i.imgur.com/TkIrScD.png' }} style={styles.logo} />
-      <Text style={styles.instructions}>
-        To add a photo from your phone's camera, just press the button below!
-      </Text>
-
-      <TouchableOpacity onPress={openImagePickerAsync} style={styles.button}>
-        <Text style={styles.buttonText}>Click a photo</Text>
-      </TouchableOpacity>
-
-    </View>
+    <View>
+    <TouchableOpacity onPress={openImagePickerAsync()} style={styles.button}>
+          <Text style={styles.buttonText}>Take another photo</Text>
+        </TouchableOpacity>
+      </View>
   );
 }
 
@@ -91,10 +108,5 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 20,
     color: '#fff',
-  },
-  thumbnail: {
-    width: 300,
-    height: 300,
-    resizeMode: 'contain',
   },
 });

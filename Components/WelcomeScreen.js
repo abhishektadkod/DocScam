@@ -12,9 +12,9 @@ export default function App() {
 
       <ImageBackground  style={styles.image}>
           <View style={styles.view}>
-            <Image source={image.loading} style={styles.logo}/>
+            <Image source={image.logo} style={styles.logo}/>
             {fontsLoaded?(<><Text style={styles.text}>Turn your IOS/Android device into</Text><Text style={{top:20}}>A PORTABLE SCANNER</Text></>):<Text>....</Text>}
-           <ActivityIndicator style={{top:80}} size="large" color="#ffffff"/>
+           <ActivityIndicator style={{top:70}} size="large" color="#ffffff"/>
          
           </View>
       </ImageBackground>
@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
       fontSize:20
     }, 
     logo:{
+        top:-20,
         width:200,
         height:200
     },
