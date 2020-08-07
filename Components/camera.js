@@ -9,6 +9,7 @@ import ImageViewer from 'react-native-image-zoom-viewer';
 import {Icon} from 'react-native-elements';
 
 
+
 export default function App() {
   let [selectedImage, setSelectedImage] = React.useState(null);
 
