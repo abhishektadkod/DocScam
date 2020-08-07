@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View, Button,CameraRoll } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView, Button,CameraRoll } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import * as Permissions from 'expo-permissions';
+import { Modal } from 'react-native';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import {Icon} from 'react-native-elements';
 
 
 export default function App() {
   let [selectedImage, setSelectedImage] = React.useState(null);
 
   let [image, multipleImage] = React.useState([]);
+  let [i, imageSet] = React.useState(null);
+  let [v, viewModal] = React.useState(false);
   
   let openImagePickerAsync = async () => {
     const { status, permissions } = await Permissions.askAsync(Permissions.CAMERA);
@@ -39,7 +44,7 @@ export default function App() {
   let openPdf = async() => {
     let x ="";
     image.map(item => { 
-        x=x+"<img width='595px' height='842px' src='"+item.name+"'/>"
+        x=x+"<img width='720px' height='942px' src='"+item.name+"'/>"
     });
      let file = await Print.printAsync({
        html: x
@@ -58,17 +63,37 @@ export default function App() {
 
   if (image.length!=0) {
     return (
-      <View style={styles.container}>
-        
-         <TouchableOpacity onPress={async()=>await  openImagePickerAsync()} style={styles.button}>
-          <Text style={styles.buttonText}>Take another photo</Text>
-        </TouchableOpacity>
+      <ScrollView  style={styles.container}>
 
-        <TouchableOpacity onPress={async()=>await openPdf()} style={styles.button}>
-          <Text style={styles.buttonText}>PDF Preview</Text>
-        </TouchableOpacity>
+    <View style={styles.imageview}>
+      {image.map((i, index) => {
+        return <Image key={index} onPress={()=>{viewModal(true);imageSet(i.name)}} source={{ uri: i.name }} style={styles.image} />;
+      })}
+    </View>
 
+      <View style={styles.buttonview}> 
+         <Icon
+                raised
+                name='camera'
+                size={30}
+                type='font-awesome'
+                color='dodgerblue'
+                onPress={async()=>await  openImagePickerAsync()} />
+         <Icon
+                raised
+                name='file-pdf-o'
+                size={30}
+                type='font-awesome'
+                color='dodgerblue'
+                onPress={async()=>await openPdf()} />
+     
       </View>
+
+      <Modal visible={v} transparent={true}>
+                <ImageViewer imageUrls={[{url:i}]}/>
+      </Modal>
+
+      </ScrollView>
     );
   }
 
@@ -85,8 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    
   },
   logo: {
     width: 305,
@@ -101,12 +125,36 @@ const styles = StyleSheet.create({
     textAlign:"center"
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: 'black',
     padding: 20,
-    borderRadius: 5,
+    margin: 4,
+    paddingHorizontal: 6,
+    textAlign: "center",
+    color: '#008f68',
+    fontSize: 10
   },
   buttonText: {
     fontSize: 20,
     color: '#fff',
   },
+  image: {
+    width: 100,
+    height: 150,
+    resizeMode: 'contain',
+  },
+  imageview:{
+    flexDirection:'row',
+    flex: 1,
+    justifyContent: 'space-between',
+    flexWrap:'wrap',
+    padding:10,
+  },
+  buttonview:{
+    flexDirection:'row',
+    bottom:0,
+    justifyContent:'center',
+    flex:1,
+    
+  }
 });
+
